@@ -77,7 +77,7 @@ class PlacementTelegramBot:
             return {"ok": False, "description": "Token not set"}
         url = f"https://api.telegram.org/bot{self.token}/{method}"
         try:
-            async with httpx.AsyncClient(timeout=15.0) as client:
+            async with httpx.AsyncClient(timeout=35.0) as client:
                 resp = await client.post(url, json=json_data)
                 return resp.json()
         except Exception as e:
