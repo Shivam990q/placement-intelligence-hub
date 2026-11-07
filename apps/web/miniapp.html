@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Placement Intelligence Hub — Mini App</title>
+    <!-- Telegram WebApp Script -->
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: var(--tg-theme-bg-color, #0b0f19);
+            color: var(--tg-theme-text-color, #f8fafc);
+            -webkit-tap-highlight-color: transparent;
+        }
+        .tg-card {
+            background-color: var(--tg-theme-secondary-bg-color, #131b2e);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+        .tg-btn-primary {
+            background-color: var(--tg-theme-button-color, #3b82f6);
+            color: var(--tg-theme-button-text-color, #ffffff);
+        }
+        .active-tab {
+            border-bottom: 2px solid #3b82f6;
+            color: #60a5fa;
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body class="min-h-screen pb-16 flex flex-col">
+
+    <!-- Top Bar -->
+    <header class="sticky top-0 z-30 px-4 py-3 bg-[#0b0f19]/90 backdrop-blur-md border-b border-white/10 flex items-center justify-between">
+        <div class="flex items-center space-x-2">
+            <span class="text-xl">🎓</span>
+            <div>
+                <h1 class="text-sm font-bold tracking-tight">Placement Intelligence Hub</h1>
+                <p class="text-[11px] text-blue-400 font-medium" id="userGreeting">Batch 2026 & 2027 Edition</p>
+            </div>
+        </div>
+        <div class="flex items-center space-x-2">
+            <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+                ● Live Radar
+            </span>
+        </div>
+    </header>
+
+    <!-- Search & Filter Bar -->
+    <div class="px-4 py-2 space-y-2">
+        <div class="relative">
+            <input type="text" id="searchInput" placeholder="Search company, skill, role..." 
+                class="w-full bg-[#131b2e] border border-white/10 rounded-xl px-4 py-2.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-blue-500 transition-colors">
+            <span class="absolute right-3 top-2.5 text-slate-500 text-sm">🔍</span>
+        </div>
+        
+        <!-- Filter Chips -->
+        <div class="flex items-center space-x-1.5 overflow-x-auto pb-1 text-xs no-scrollbar">
+            <button onclick="setBatchFilter('ALL')" class="batch-chip px-3 py-1 rounded-full bg-blue-600 text-white font-medium whitespace-nowrap" id="chip-ALL">All Batches</button>
+            <button onclick="setBatchFilter('2026')" class="batch-chip px-3 py-1 rounded-full bg-slate-800 text-slate-300 font-medium whitespace-nowrap" id="chip-2026">2026 Batch</button>
+            <button onclick="setBatchFilter('2027')" class="batch-chip px-3 py-1 rounded-full bg-slate-800 text-slate-300 font-medium whitespace-nowrap" id="chip-2027">2027 Batch</button>
+            <button onclick="setBatchFilter('2028')" class="batch-chip px-3 py-1 rounded-full bg-slate-800 text-slate-300 font-medium whitespace-nowrap" id="chip-2028">2028 Batch</button>
+        </div>
+    </div>
+
+    <!-- Category Tabs -->
+    <nav class="flex border-b border-white/10 px-4 text-xs font-medium text-slate-400 overflow-x-auto">
+        <button onclick="switchTab('all')" class="tab-btn py-2.5 px-3 active-tab whitespace-nowrap" id="tab-all">All Streams</button>
+        <button onclick="switchTab('internship')" class="tab-btn py-2.5 px-3 whitespace-nowrap" id="tab-internship">Internships</button>
+        <button onclick="switchTab('full_time')" class="tab-btn py-2.5 px-3 whitespace-nowrap" id="tab-full_time">Full-Time</button>
+        <button onclick="switchTab('mass_hiring')" class="tab-btn py-2.5 px-3 whitespace-nowrap" id="tab-mass_hiring">Mass Hiring</button>
+    </nav>
+
+    <!-- Priority Watchdog Banner -->
+    <div class="mx-4 mt-3 p-3 rounded-xl bg-gradient-to-r from-blue-900/40 via-indigo-900/30 to-purple-900/40 border border-blue-500/30">
+        <div class="flex items-start justify-between">
+            <div class="space-y-1">
+                <span class="inline-block px-2 py-0.5 rounded text-[10px] font-bold bg-blue-500 text-white uppercase tracking-wider">High Priority Watchdog</span>
+                <h3 class="text-xs font-bold text-white">Ethara.AI — LLM Post-Training GenOPS</h3>
+                <p class="text-[11px] text-slate-300">Package: <span class="text-emerald-400 font-semibold">₹6 LPA</span> • Requirement: <span class="text-amber-300">Pure English Only</span></p>
+            </div>
+            <a href="https://hrms.ethara.ai/careers" target="_blank" class="px-2.5 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-500 text-[11px] font-semibold text-white shadow-lg shadow-blue-500/20 whitespace-nowrap">
+                Check Portal ↗
+            </a>
+        </div>
+    </div>
+
+    <!-- Job Cards Feed -->
+    <main class="flex-1 px-4 py-3 space-y-3" id="cardsContainer">
+        <!-- Rendered dynamically -->
+        <div class="text-center py-10 text-slate-500 text-xs">
+            Connecting to Placement Intelligence Hub API...
+        </div>
+    </main>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="fixed bottom-6 left-1/2 -translate-x-1/2 px-4 py-2 bg-emerald-600 text-white text-xs font-semibold rounded-full shadow-xl opacity-0 pointer-events-none transition-opacity duration-300 z-50">
+        Copied to clipboard!
+    </div>
+
+    <script>
+        // Initialize Telegram WebApp API
+        const tg = window.Telegram ? window.Telegram.WebApp : null;
+        if (tg) {
+            tg.ready();
+            tg.expand();
+            if (tg.initDataUnsafe && tg.initDataUnsafe.user) {
+                document.getElementById('userGreeting').innerText = `Hi, ${tg.initDataUnsafe.user.first_name} • 2026/2027 Radar`;
+            }
+        }
+
+        let opportunities = [];
+        let currentTab = 'all';
+        let currentBatch = 'ALL';
+
+        // Sample initial opportunities if offline or loading API
+        const fallbackOpportunities = [
+            {
+                id: "ethara-1",
+                company: "Ethara.AI",
+                title: "LLM Post-Training – GenOPS",
+                role_category: "full_time",
+                locations: "Gurugram / Remote",
+                eligible_batches: ["2026", "2027", "2028"],
+                ctc_text: "₹6 LPA",
+                apply_url: "https://hrms.ethara.ai/careers",
+                requirements: "Pure English writing excellence, prompt evaluation, RLHF/SFT comprehension.",
+                status: "approved"
+            },
+            {
+                id: "amazon-sde-2027",
+                company: "Amazon",
+                title: "Software Development Engineer Intern (May 2027)",
+                role_category: "internship",
+                locations: "Bangalore / Hyderabad",
+                eligible_batches: ["2027"],
+                ctc_text: "₹1,10,000 / month",
+                apply_url: "https://www.amazon.jobs/en/jobs/2928172/software-development-engineer-intern-2027",
+                requirements: "CS/IT, strong Data Structures, C++/Java/Python, graduating May 2027.",
+                status: "approved"
+            },
+            {
+                id: "hevo-1",
+                company: "Hevo Data",
+                title: "Associate Software Developer",
+                role_category: "full_time",
+                locations: "Pune",
+                eligible_batches: ["2026", "2027"],
+                ctc_text: "6 - 8 LPA",
+                apply_url: "https://go.acciojob.com/pP8wXz",
+                requirements: "BE/B.Tech (CS, IT, EC, AI), Strong problem solving.",
+                status: "approved"
+            },
+            {
+                id: "tcs-nqt-2027",
+                company: "Tata Consultancy Services (TCS)",
+                title: "TCS NQT Mass Hiring Drive (Prime / Digital / Ninja)",
+                role_category: "mass_hiring",
+                locations: "Pan India",
+                eligible_batches: ["2026", "2027"],
+                ctc_text: "3.6 - 11 LPA",
+                apply_url: "https://www.tcs.com/careers/tcs-national-qualifier-test",
+                requirements: "B.Tech/BE/MCA/M.Tech, 60% throughout academics.",
+                status: "approved"
+            }
+        ];
+
+        async function fetchOpportunities() {
+            try {
+                const res = await fetch('/api/opportunities');
+                if (res.ok) {
+                    const data = await res.json();
+                    if (data && data.length > 0) {
+                        opportunities = data;
+                        renderCards();
+                        return;
+                    }
+                }
+            } catch (err) {
+                console.log("Using cached/fallback opportunities data.");
+            }
+            opportunities = fallbackOpportunities;
+            renderCards();
+        }
+
+        function renderCards() {
+            const container = document.getElementById('cardsContainer');
+            const search = document.getElementById('searchInput').value.toLowerCase();
+
+            const filtered = opportunities.filter(opp => {
+                // Tab filter
+                if (currentTab !== 'all' && opp.role_category !== currentTab) return false;
+                // Batch filter
+                if (currentBatch !== 'ALL' && (!opp.eligible_batches || !opp.eligible_batches.includes(currentBatch))) return false;
+                // Search filter
+                if (search) {
+                    const haystack = `${opp.company} ${opp.title} ${opp.requirements || ''} ${opp.locations || ''}`.toLowerCase();
+                    if (!haystack.includes(search)) return false;
+                }
+                return true;
+            });
+
+            if (filtered.length === 0) {
+                container.innerHTML = `
+                    <div class="text-center py-12 text-slate-500">
+                        <p class="text-2xl mb-2">🔍</p>
+                        <p class="text-xs font-semibold text-slate-400">No opportunities match your filter.</p>
+                        <p class="text-[11px] text-slate-600 mt-1">Try switching batches or searching another term.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = filtered.map(opp => `
+                <div class="tg-card rounded-xl p-3.5 space-y-2.5 transition-all">
+                    <div class="flex items-start justify-between">
+                        <div>
+                            <span class="text-[10px] font-bold text-blue-400 uppercase tracking-wider">${opp.company}</span>
+                            <h4 class="text-xs font-bold text-white leading-tight mt-0.5">${opp.title}</h4>
+                        </div>
+                        <span class="px-2 py-0.5 rounded text-[10px] font-semibold ${getBadgeColor(opp.role_category)}">
+                            ${opp.role_category ? opp.role_category.replace('_', ' ').toUpperCase() : 'JOB'}
+                        </span>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-2 text-[11px] text-slate-300 bg-black/20 p-2 rounded-lg">
+                        <div>
+                            <span class="text-slate-500 text-[10px] block">Batch:</span>
+                            <span class="font-semibold text-blue-300">${opp.eligible_batches ? opp.eligible_batches.join(', ') : 'All'}</span>
+                        </div>
+                        <div>
+                            <span class="text-slate-500 text-[10px] block">Package / Stipend:</span>
+                            <span class="font-semibold text-emerald-400">${opp.ctc_text || 'Competitive'}</span>
+                        </div>
+                    </div>
+
+                    <p class="text-[11px] text-slate-400 line-clamp-2">${opp.requirements || 'Visit application portal for comprehensive eligibility criteria.'}</p>
+
+                    <div class="flex items-center space-x-2 pt-1">
+                        <button onclick="openApply('${opp.apply_url}')" class="flex-1 py-2 rounded-lg tg-btn-primary text-xs font-bold shadow-md hover:brightness-110 active:scale-[0.98] transition-all">
+                            🚀 Apply Now
+                        </button>
+                        <button onclick="copyWhatsAppCard('${opp.id}')" class="px-3 py-2 rounded-lg bg-emerald-600/20 hover:bg-emerald-600/30 text-emerald-400 border border-emerald-500/30 text-xs font-semibold flex items-center space-x-1 active:scale-[0.98] transition-all">
+                            <span>📋</span>
+                            <span>Share</span>
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function getBadgeColor(cat) {
+            if (cat === 'internship') return 'bg-cyan-500/10 text-cyan-400 border border-cyan-500/20';
+            if (cat === 'mass_hiring') return 'bg-amber-500/10 text-amber-400 border border-amber-500/20';
+            return 'bg-purple-500/10 text-purple-400 border border-purple-500/20';
+        }
+
+        function openApply(url) {
+            if (tg) {
+                tg.openLink(url);
+            } else {
+                window.open(url, '_blank');
+            }
+        }
+
+        function copyWhatsAppCard(id) {
+            const opp = opportunities.find(o => o.id === id);
+            if (!opp) return;
+
+            const text = `🚨 *NEW HIRING ALERT — PLACEMENT INTELLIGENCE HUB*\n\n` +
+                         `🏢 *Company:* ${opp.company}\n` +
+                         `💼 *Role:* ${opp.title}\n` +
+                         `📍 *Location:* ${opp.locations || 'Pan India / Hybrid'}\n` +
+                         `🎓 *Batch:* ${opp.eligible_batches ? opp.eligible_batches.join(', ') : '2026 / 2027'}\n` +
+                         `💰 *Package:* ${opp.ctc_text || 'Competitive'}\n\n` +
+                         `🔗 *Apply Direct:* ${opp.apply_url}\n\n` +
+                         `📲 Verified by @Placements`;
+
+            navigator.clipboard.writeText(text).then(() => {
+                showToast("Copied WhatsApp Card to clipboard!");
+                if (tg && tg.HapticFeedback) {
+                    tg.HapticFeedback.notificationOccurred('success');
+                }
+            });
+        }
+
+        function showToast(msg) {
+            const toast = document.getElementById('toast');
+            toast.innerText = msg;
+            toast.classList.remove('opacity-0');
+            toast.classList.add('opacity-100');
+            setTimeout(() => {
+                toast.classList.remove('opacity-100');
+                toast.classList.add('opacity-0');
+            }, 2000);
+        }
+
+        function switchTab(tab) {
+            currentTab = tab;
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active-tab'));
+            document.getElementById(`tab-${tab}`).classList.add('active-tab');
+            renderCards();
+        }
+
+        function setBatchFilter(batch) {
+            currentBatch = batch;
+            document.querySelectorAll('.batch-chip').forEach(c => {
+                c.classList.remove('bg-blue-600', 'text-white');
+                c.classList.add('bg-slate-800', 'text-slate-300');
+            });
+            const active = document.getElementById(`chip-${batch}`);
+            active.classList.remove('bg-slate-800', 'text-slate-300');
+            active.classList.add('bg-blue-600', 'text-white');
+            renderCards();
+        }
+
+        document.getElementById('searchInput').addEventListener('input', renderCards);
+
+        // Fetch on load
+        fetchOpportunities();
+    </script>
+</body>
+</html>

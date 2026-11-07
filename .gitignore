@@ -1,0 +1,55 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+.venv/
+venv/
+ENV/
+
+# Database & Runtime Data
+*.db
+*.sqlite
+*.sqlite3
+data/
+backups/
+
+# Environment Variables & Secrets
+.env
+.env.local
+
+# Rust
+apps/rust-dedup/target/
+**/*.rs.bk
+
+# Go Binaries
+apps/go-crawler/crawler.exe
+apps/go-crawler/crawler
+*.exe
+
+# Node & Frontend
+node_modules/
+.wrangler/
+dist/
+
+# Pytest & Coverage
+.pytest_cache/
+.coverage
+htmlcov/
