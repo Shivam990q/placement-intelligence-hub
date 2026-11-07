@@ -103,3 +103,4 @@ CREATE TABLE IF NOT EXISTS audit_logs (
     details TEXT NOT NULL DEFAULT '{}',
     created_at TEXT NOT NULL DEFAULT (datetime('now'))
 );
+

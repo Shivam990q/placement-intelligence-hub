@@ -286,3 +286,4 @@ export default {
     console.log('Cron triggered: scanning career watchdogs at', new Date().toISOString());
   },
 };
+

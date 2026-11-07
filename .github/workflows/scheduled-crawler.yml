@@ -30,3 +30,4 @@ jobs:
           INGEST_SECRET: ${{ secrets.INGEST_SECRET }}
         run: |
           python scripts/scheduled_scraper.py
+
