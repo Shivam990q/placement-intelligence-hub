@@ -257,3 +257,4 @@ func main() {
 
 	fmt.Fprintf(os.Stderr, "⚡ [Go High-Speed Crawler] Completed %d opportunities in %v\n", len(allOpps), elapsed)
 }
+

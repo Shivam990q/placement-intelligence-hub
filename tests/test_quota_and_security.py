@@ -90,3 +90,4 @@ def test_telegram_init_data_verification():
     forged_init_data = raw_init_data.replace(valid_hash, "0000000000000000000000000000000000000000000000000000000000000000")
     forged_res = verify_telegram_init_data(forged_init_data, bot_token)
     assert forged_res is None
+
