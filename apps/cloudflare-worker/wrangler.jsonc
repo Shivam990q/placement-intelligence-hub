@@ -1,0 +1,22 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "placement-intelligence-hub",
+  "main": "src/index.ts",
+  "compatibility_date": "2024-09-23",
+  "compatibility_flags": ["nodejs_compat"],
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "placement_hub_d1",
+      "database_id": "YOUR_D1_DATABASE_ID_HERE"
+    }
+  ],
+  "triggers": {
+    "crons": ["*/15 * * * *"]
+  },
+  "vars": {
+    "APP_NAME": "Placement Intelligence Hub (Cloudflare Edge)",
+    "TARGET_BATCH": "2026,2027",
+    "INGEST_SECRET": "placement_secret_token_2026"
+  }
+}
