@@ -37,6 +37,16 @@ class Settings(BaseSettings):
     TELEGRAM_TOPIC_GENAI_OPS: Optional[int] = None
     TELEGRAM_TOPIC_RESOURCES: Optional[int] = None
     TELEGRAM_TOPIC_DISCUSSIONS: Optional[int] = None
+    TELEGRAM_BOT_USERNAME: Optional[str] = "CampusPlacementRadarBot"
+
+    # Cloudflare Serverless & Edge API (Optional)
+    EDGE_API_URL: Optional[str] = None
+    INGEST_SECRET: Optional[str] = "placement_hub_secret_key_2026"
+
+    # Zero-Cost AI Gateway Keys (Optional - Deterministic Regex handles 90%+ offline)
+    CLOUDFLARE_ACCOUNT_ID: Optional[str] = None
+    CLOUDFLARE_API_TOKEN: Optional[str] = None
+    HUGGINGFACE_API_TOKEN: Optional[str] = None
     
     # Watchdog & Crawler Settings
     WATCHDOG_ENABLED: bool = True
