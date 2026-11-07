@@ -1,0 +1,539 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Placement Intelligence Hub — College Radar & Watchdog</title>
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Font Awesome / Lucide Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              50: '#eef2ff',
+              500: '#6366f1',
+              600: '#4f46e5',
+              700: '#4338ca',
+              900: '#312e81',
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap');
+    body { font-family: 'Plus Jakarta Sans', sans-serif; }
+    .mono { font-family: 'JetBrains Mono', monospace; }
+  </style>
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen antialiased flex flex-col">
+
+  <!-- Top Navigation Bar -->
+  <header class="border-b border-slate-800/80 bg-slate-900/60 backdrop-blur-md sticky top-0 z-50">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+      <div class="flex items-center space-x-3">
+        <div class="h-10 w-10 rounded-xl bg-gradient-to-tr from-indigo-500 to-purple-500 flex items-center justify-center shadow-lg shadow-indigo-500/20">
+          <i class="fa-solid fa-radar text-white text-lg"></i>
+        </div>
+        <div>
+          <div class="font-extrabold text-base tracking-tight text-white flex items-center gap-2">
+            Placement Intelligence Hub
+            <span class="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">Live Watchdog</span>
+          </div>
+          <p class="text-xs text-slate-400">Batch 2026/2027 • Telegram & WhatsApp Distribution Network</p>
+        </div>
+      </div>
+
+      <div class="flex items-center space-x-3">
+        <button id="refreshBtn" onclick="loadAllData()" class="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-xs font-semibold text-slate-200 border border-slate-700 transition flex items-center gap-1.5">
+          <i class="fa-solid fa-rotate"></i>
+          <span>Refresh</span>
+        </button>
+        <button id="triggerScanBtn" onclick="triggerCrawl()" class="px-3.5 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-xs font-semibold text-white shadow-md shadow-indigo-600/30 transition flex items-center gap-1.5">
+          <i class="fa-solid fa-bolt"></i>
+          <span>Trigger Live Scan</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Container -->
+  <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 flex-1 w-full space-y-6">
+
+    <!-- Target Focus Banner: Ethara.AI Watchdog -->
+    <div class="relative overflow-hidden rounded-2xl bg-gradient-to-r from-indigo-950/80 via-slate-900/90 to-purple-950/80 border border-indigo-500/30 p-5 shadow-xl">
+      <div class="absolute -right-10 -bottom-10 w-44 h-44 bg-indigo-500/10 rounded-full blur-3xl pointer-events-none"></div>
+      <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div class="space-y-1.5">
+          <div class="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-indigo-400">
+            <span class="inline-block w-2 h-2 rounded-full bg-indigo-400 animate-ping"></span>
+            Priority Target Watchdog
+          </div>
+          <h2 class="text-lg font-bold text-white flex items-center gap-2">
+            Ethara.AI — LLM Post-Training GenOPS
+            <span class="text-xs px-2.5 py-0.5 rounded-md bg-purple-500/20 text-purple-300 border border-purple-500/30">Target: ₹6 LPA</span>
+          </h2>
+          <p class="text-xs text-slate-300">
+            Scanning <code class="mono text-indigo-300 bg-slate-800/80 px-1 py-0.5 rounded">hrms.ethara.ai/careers</code> every 15 min. Rule: Pure English only • Prompt Evaluation & SFT/RLHF.
+          </p>
+        </div>
+        <div class="flex items-center gap-3">
+          <a href="https://hrms.ethara.ai/careers" target="_blank" class="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-xs font-medium text-slate-200 border border-slate-700 transition flex items-center gap-1.5">
+            <i class="fa-solid fa-arrow-up-right-from-square"></i>
+            <span>Open Ethara HRMS</span>
+          </a>
+          <button onclick="filterByCompany('Ethara.AI')" class="px-3 py-1.5 rounded-lg bg-indigo-600/30 hover:bg-indigo-600/50 text-indigo-200 border border-indigo-500/40 text-xs font-semibold transition">
+            View Role Details
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Telemetry KPI Cards -->
+    <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+      <div class="bg-slate-900/60 border border-slate-800/80 rounded-xl p-4 flex items-center justify-between">
+        <div>
+          <p class="text-xs font-medium text-slate-400 uppercase tracking-wider">Total Discovered</p>
+          <h3 id="statTotal" class="text-2xl font-extrabold text-white mt-1">--</h3>
+          <p class="text-[11px] text-slate-500 mt-0.5">Across all adapters</p>
+        </div>
+        <div class="w-10 h-10 rounded-lg bg-slate-800 flex items-center justify-center text-indigo-400">
+          <i class="fa-solid fa-database text-base"></i>
+        </div>
+      </div>
+
+      <div class="bg-slate-900/60 border border-amber-500/20 rounded-xl p-4 flex items-center justify-between">
+        <div>
+          <p class="text-xs font-medium text-amber-400 uppercase tracking-wider">Pending Approvals</p>
+          <h3 id="statPending" class="text-2xl font-extrabold text-amber-300 mt-1">--</h3>
+          <p class="text-[11px] text-slate-500 mt-0.5">Awaiting distribution</p>
+        </div>
+        <div class="w-10 h-10 rounded-lg bg-amber-500/10 flex items-center justify-center text-amber-400">
+          <i class="fa-solid fa-clock text-base"></i>
+        </div>
+      </div>
+
+      <div class="bg-slate-900/60 border border-emerald-500/20 rounded-xl p-4 flex items-center justify-between">
+        <div>
+          <p class="text-xs font-medium text-emerald-400 uppercase tracking-wider">Approved & Sent</p>
+          <h3 id="statPublished" class="text-2xl font-extrabold text-emerald-300 mt-1">--</h3>
+          <p class="text-[11px] text-slate-500 mt-0.5">To Telegram & WhatsApp</p>
+        </div>
+        <div class="w-10 h-10 rounded-lg bg-emerald-500/10 flex items-center justify-center text-emerald-400">
+          <i class="fa-solid fa-paper-plane text-base"></i>
+        </div>
+      </div>
+
+      <div class="bg-slate-900/60 border border-slate-800/80 rounded-xl p-4 flex items-center justify-between">
+        <div>
+          <p class="text-xs font-medium text-slate-400 uppercase tracking-wider">Active Watchdogs</p>
+          <h3 id="statSources" class="text-2xl font-extrabold text-white mt-1">--</h3>
+          <p class="text-[11px] text-slate-500 mt-0.5">ATS, Portals & Feeds</p>
+        </div>
+        <div class="w-10 h-10 rounded-lg bg-slate-800 flex items-center justify-center text-purple-400">
+          <i class="fa-solid fa-tower-broadcast text-base"></i>
+        </div>
+      </div>
+    </div>
+
+    <!-- Navigation Tabs -->
+    <div class="border-b border-slate-800 flex items-center space-x-6 text-sm font-semibold">
+      <button onclick="switchTab('approval')" id="tabApproval" class="pb-3 border-b-2 border-indigo-500 text-indigo-400 transition flex items-center gap-2">
+        <i class="fa-solid fa-inbox"></i>
+        <span>Approval Queue</span>
+        <span id="badgePendingCount" class="text-[10px] px-1.5 py-0.5 rounded-full bg-amber-500/20 text-amber-300">0</span>
+      </button>
+      <button onclick="switchTab('directory')" id="tabDirectory" class="pb-3 border-b-2 border-transparent text-slate-400 hover:text-slate-200 transition flex items-center gap-2">
+        <i class="fa-solid fa-list-check"></i>
+        <span>All Opportunities</span>
+      </button>
+      <button onclick="switchTab('sources')" id="tabSources" class="pb-3 border-b-2 border-transparent text-slate-400 hover:text-slate-200 transition flex items-center gap-2">
+        <i class="fa-solid fa-server"></i>
+        <span>Source Watchdogs</span>
+      </button>
+    </div>
+
+    <!-- TAB 1: Approval Queue -->
+    <section id="viewApproval" class="space-y-4">
+      <div id="pendingContainer" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <!-- Rendered via JS -->
+      </div>
+    </section>
+
+    <!-- TAB 2: All Opportunities Directory -->
+    <section id="viewDirectory" class="space-y-4 hidden">
+      <!-- Search & Filters -->
+      <div class="flex flex-col sm:flex-row gap-3">
+        <div class="relative flex-1">
+          <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-3 text-slate-500 text-xs"></i>
+          <input type="text" id="searchInput" oninput="debounceSearch()" placeholder="Search by company, role (e.g. Amazon, SDE, GenOPS)..." class="w-full bg-slate-900 border border-slate-800 rounded-xl pl-9 pr-4 py-2 text-xs text-slate-200 focus:outline-none focus:border-indigo-500 placeholder-slate-500" />
+        </div>
+        <select id="batchFilter" onchange="loadOpportunities()" class="bg-slate-900 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-indigo-500">
+          <option value="">All Batches</option>
+          <option value="2027">Batch 2027</option>
+          <option value="2026">Batch 2026</option>
+          <option value="Freshers">Freshers</option>
+        </select>
+        <select id="categoryFilter" onchange="loadOpportunities()" class="bg-slate-900 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-indigo-500">
+          <option value="">All Categories</option>
+          <option value="internship">Internships</option>
+          <option value="full_time">Full Time</option>
+          <option value="genai_ops">AI / GenOPS</option>
+          <option value="mass_hiring">Mass Hiring</option>
+          <option value="resource">Prep Resources</option>
+        </select>
+      </div>
+
+      <div class="overflow-x-auto rounded-xl border border-slate-800 bg-slate-900/40">
+        <table class="w-full text-left text-xs text-slate-300">
+          <thead class="bg-slate-800/60 uppercase font-semibold text-slate-400 border-b border-slate-800">
+            <tr>
+              <th class="px-4 py-3">Company & Role</th>
+              <th class="px-4 py-3">Category</th>
+              <th class="px-4 py-3">Eligible Batch</th>
+              <th class="px-4 py-3">Package</th>
+              <th class="px-4 py-3">Status</th>
+              <th class="px-4 py-3 text-right">Actions</th>
+            </tr>
+          </thead>
+          <tbody id="directoryTableBody" class="divide-y divide-slate-800/60">
+            <!-- Rendered via JS -->
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- TAB 3: Sources & Watchdogs -->
+    <section id="viewSources" class="space-y-4 hidden">
+      <div id="sourcesContainer" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <!-- Rendered via JS -->
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Modal for WhatsApp / Telegram Formats Preview -->
+  <div id="formatModal" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+    <div class="bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-2xl p-6 space-y-4 shadow-2xl">
+      <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+        <h3 id="modalTitle" class="text-base font-bold text-white flex items-center gap-2">
+          <i class="fa-solid fa-copy text-indigo-400"></i>
+          Distribution Card Preview
+        </h3>
+        <button onclick="closeModal()" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
+      </div>
+
+      <div class="space-y-4">
+        <!-- WhatsApp Section -->
+        <div>
+          <div class="flex items-center justify-between mb-1.5">
+            <span class="text-xs font-bold text-emerald-400 uppercase tracking-wider flex items-center gap-1.5">
+              <i class="fa-brands fa-whatsapp text-sm"></i>
+              WhatsApp Group Card (1-Click Copy Ready)
+            </span>
+            <button id="copyWaBtn" onclick="copyText('modalWaText', 'copyWaBtn')" class="px-2.5 py-1 rounded bg-emerald-600/20 hover:bg-emerald-600/30 text-emerald-300 border border-emerald-500/30 text-xs font-semibold flex items-center gap-1 transition">
+              <i class="fa-solid fa-clipboard"></i>
+              <span>Copy for WhatsApp</span>
+            </button>
+          </div>
+          <pre id="modalWaText" class="mono text-xs bg-slate-950 border border-slate-800 rounded-xl p-3 text-slate-200 overflow-x-auto whitespace-pre-wrap select-all"></pre>
+        </div>
+
+        <!-- Telegram Section -->
+        <div>
+          <div class="flex items-center justify-between mb-1.5">
+            <span class="text-xs font-bold text-sky-400 uppercase tracking-wider flex items-center gap-1.5">
+              <i class="fa-brands fa-telegram text-sm"></i>
+              Telegram Markdown Card
+            </span>
+            <button id="copyTgBtn" onclick="copyText('modalTgText', 'copyTgBtn')" class="px-2.5 py-1 rounded bg-sky-600/20 hover:bg-sky-600/30 text-sky-300 border border-sky-500/30 text-xs font-semibold flex items-center gap-1 transition">
+              <i class="fa-solid fa-clipboard"></i>
+              <span>Copy Telegram Card</span>
+            </button>
+          </div>
+          <pre id="modalTgText" class="mono text-xs bg-slate-950 border border-slate-800 rounded-xl p-3 text-slate-300 overflow-x-auto whitespace-pre-wrap select-all"></pre>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notification -->
+  <div id="toast" class="fixed bottom-6 right-6 bg-indigo-600 text-white px-4 py-2.5 rounded-xl shadow-lg border border-indigo-400/40 text-xs font-semibold transition transform translate-y-20 opacity-0 pointer-events-none z-50 flex items-center gap-2">
+    <i class="fa-solid fa-circle-check"></i>
+    <span id="toastMsg">Action completed successfully</span>
+  </div>
+
+  <script>
+    let searchTimer = null;
+
+    async function loadStats() {
+      try {
+        const res = await fetch('/api/stats');
+        const data = await res.json();
+        document.getElementById('statTotal').innerText = data.total_discovered || 0;
+        document.getElementById('statPending').innerText = data.pending_approvals || 0;
+        document.getElementById('statPublished').innerText = data.published_approved || 0;
+        document.getElementById('statSources').innerText = data.active_sources || 0;
+        document.getElementById('badgePendingCount').innerText = data.pending_approvals || 0;
+      } catch (err) {
+        console.error('Failed to load stats', err);
+      }
+    }
+
+    async function loadPendingApprovals() {
+      try {
+        const res = await fetch('/api/approvals/pending');
+        const items = await res.json();
+        const container = document.getElementById('pendingContainer');
+        if (!items || items.length === 0) {
+          container.innerHTML = `
+            <div class="col-span-full py-12 text-center text-slate-500 space-y-2">
+              <i class="fa-solid fa-circle-check text-4xl text-slate-600"></i>
+              <p class="text-sm">Approval queue is clear! All discovered opportunities have been processed.</p>
+            </div>
+          `;
+          return;
+        }
+
+        container.innerHTML = items.map(opp => `
+          <div class="bg-slate-900/80 border border-slate-800 hover:border-slate-700 rounded-2xl p-5 space-y-4 transition flex flex-col justify-between">
+            <div class="space-y-2">
+              <div class="flex items-center justify-between">
+                <span class="text-xs font-extrabold uppercase tracking-wider text-indigo-400 bg-indigo-500/10 border border-indigo-500/20 px-2 py-0.5 rounded-md">
+                  ${opp.company}
+                </span>
+                <span class="text-[11px] font-semibold px-2 py-0.5 rounded-full ${
+                  opp.verification_status === 'verified_official' ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' : 'bg-amber-500/10 text-amber-400 border border-amber-500/20'
+                }">
+                  ${opp.verification_status.replace('_', ' ')}
+                </span>
+              </div>
+              <h3 class="text-base font-bold text-white">${opp.title}</h3>
+              <p class="text-xs text-slate-400">${opp.summary || 'No summary provided.'}</p>
+              
+              <div class="flex flex-wrap gap-1.5 pt-1">
+                ${(opp.eligible_batches || []).map(b => `<span class="bg-slate-800 text-slate-300 text-[10px] px-2 py-0.5 rounded">Batch: ${b}</span>`).join('')}
+                <span class="bg-slate-800 text-emerald-400 text-[10px] px-2 py-0.5 rounded font-mono">${opp.ctc_text || 'Disclosed in portal'}</span>
+                <span class="bg-slate-800 text-slate-400 text-[10px] px-2 py-0.5 rounded">${(opp.locations || []).join(', ') || 'India'}</span>
+              </div>
+            </div>
+
+            <div class="pt-3 border-t border-slate-800/80 flex items-center justify-between gap-2">
+              <button onclick="openFormatModal(${opp.id})" class="px-2.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-xs font-semibold text-slate-300 transition flex items-center gap-1.5">
+                <i class="fa-solid fa-eye text-xs"></i>
+                <span>Preview Cards</span>
+              </button>
+
+              <div class="flex items-center gap-1.5">
+                <button onclick="handleApprovalAction(${opp.id}, 'reject')" class="px-3 py-1.5 rounded-lg bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border border-rose-500/30 text-xs font-semibold transition">
+                  Reject
+                </button>
+                <button onclick="handleApprovalAction(${opp.id}, 'approve')" class="px-3.5 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold shadow-md shadow-indigo-600/30 transition flex items-center gap-1">
+                  <i class="fa-solid fa-check text-xs"></i>
+                  <span>Approve & Post</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        `).join('');
+      } catch (err) {
+        console.error('Failed to load pending', err);
+      }
+    }
+
+    async function loadOpportunities() {
+      const search = document.getElementById('searchInput').value;
+      const batch = document.getElementById('batchFilter').value;
+      const category = document.getElementById('categoryFilter').value;
+
+      const url = new URL('/api/opportunities', window.location.origin);
+      if (search) url.searchParams.set('search', search);
+      if (batch) url.searchParams.set('batch', batch);
+      if (category) url.searchParams.set('role_category', category);
+
+      try {
+        const res = await fetch(url);
+        const opps = await res.json();
+        const tbody = document.getElementById('directoryTableBody');
+        tbody.innerHTML = opps.map(opp => `
+          <tr class="hover:bg-slate-800/30 transition">
+            <td class="px-4 py-3">
+              <div class="font-bold text-white">${opp.company}</div>
+              <div class="text-slate-400 text-[11px]">${opp.title}</div>
+            </td>
+            <td class="px-4 py-3 capitalize text-slate-300">${opp.role_category.replace('_', ' ')}</td>
+            <td class="px-4 py-3">
+              <span class="bg-indigo-500/10 text-indigo-400 text-[10px] px-2 py-0.5 rounded border border-indigo-500/20">
+                ${(opp.eligible_batches || []).join(', ') || 'All'}
+              </span>
+            </td>
+            <td class="px-4 py-3 font-mono text-emerald-400">${opp.ctc_text || 'Portal'}</td>
+            <td class="px-4 py-3">
+              <span class="text-[10px] px-2 py-0.5 rounded-full ${
+                opp.status === 'published' ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' : 
+                opp.status === 'approved' ? 'bg-sky-500/10 text-sky-400 border border-sky-500/20' : 
+                'bg-amber-500/10 text-amber-400 border border-amber-500/20'
+              }">
+                ${opp.status.replace('_', ' ')}
+              </span>
+            </td>
+            <td class="px-4 py-3 text-right space-x-1">
+              <button onclick="openFormatModal(${opp.id})" class="px-2 py-1 rounded bg-slate-800 hover:bg-slate-700 text-slate-300 text-[11px] font-semibold">
+                View
+              </button>
+              <a href="${opp.apply_url}" target="_blank" class="px-2 py-1 rounded bg-indigo-600/30 text-indigo-300 hover:bg-indigo-600/50 text-[11px] font-semibold inline-block">
+                Portal
+              </a>
+            </td>
+          </tr>
+        `).join('');
+      } catch (err) {
+        console.error('Failed to load opportunities', err);
+      }
+    }
+
+    async function loadSources() {
+      try {
+        const res = await fetch('/api/sources');
+        const sources = await res.json();
+        const container = document.getElementById('sourcesContainer');
+        container.innerHTML = sources.map(s => `
+          <div class="bg-slate-900 border border-slate-800 rounded-xl p-4 space-y-3">
+            <div class="flex items-center justify-between">
+              <h4 class="font-bold text-white text-sm">${s.name}</h4>
+              <span class="text-[10px] uppercase font-bold px-2 py-0.5 rounded-full ${
+                s.last_status === 'ok' ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' : 'bg-slate-800 text-slate-400'
+              }">
+                ${s.last_status}
+              </span>
+            </div>
+            <p class="text-xs text-slate-400 truncate mono">${s.base_url}</p>
+            <div class="flex items-center justify-between text-xs text-slate-500 pt-2 border-t border-slate-800/60">
+              <span>Discovered: <strong class="text-slate-300">${s.total_discovered || 0}</strong></span>
+              <span>Interval: ${s.check_interval_minutes}m</span>
+            </div>
+          </div>
+        `).join('');
+      } catch (err) {
+        console.error('Failed to load sources', err);
+      }
+    }
+
+    async function handleApprovalAction(oppId, action) {
+      try {
+        const res = await fetch(`/api/approvals/${oppId}/action`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ action: action, reviewed_by: 'Shivam Admin' })
+        });
+        const result = await res.json();
+        showToast(action === 'approve' ? '🎉 Opportunity Approved & Queued for Distribution!' : 'Opportunity Rejected');
+        loadAllData();
+      } catch (err) {
+        showToast('Error processing action', true);
+      }
+    }
+
+    async function triggerCrawl() {
+      const btn = document.getElementById('triggerScanBtn');
+      btn.disabled = true;
+      btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Scanning...`;
+      try {
+        const res = await fetch('/api/sources/crawl', { method: 'POST' });
+        const data = await res.json();
+        showToast(`Scan complete: ${data.summary.new_opportunities_created} new opportunities found!`);
+        loadAllData();
+      } catch (err) {
+        showToast('Failed to trigger scan', true);
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = `<i class="fa-solid fa-bolt"></i> <span>Trigger Live Scan</span>`;
+      }
+    }
+
+    async function openFormatModal(oppId) {
+      try {
+        const res = await fetch(`/api/opportunities/${oppId}/formats`);
+        const data = await res.json();
+        document.getElementById('modalTitle').innerHTML = `
+          <i class="fa-solid fa-copy text-indigo-400"></i>
+          ${data.company} — ${data.title}
+        `;
+        document.getElementById('modalWaText').innerText = data.whatsapp_card;
+        document.getElementById('modalTgText').innerText = data.telegram_markdown;
+        document.getElementById('formatModal').classList.remove('hidden');
+      } catch (err) {
+        showToast('Error loading formats', true);
+      }
+    }
+
+    function closeModal() {
+      document.getElementById('formatModal').classList.add('hidden');
+    }
+
+    function copyText(elementId, btnId) {
+      const text = document.getElementById(elementId).innerText;
+      navigator.clipboard.writeText(text);
+      const btn = document.getElementById(btnId);
+      const origHtml = btn.innerHTML;
+      btn.innerHTML = `<i class="fa-solid fa-check"></i> Copied!`;
+      setTimeout(() => { btn.innerHTML = origHtml; }, 2000);
+      showToast('Copied to clipboard! Ready to paste into WhatsApp group.');
+    }
+
+    function switchTab(tab) {
+      document.getElementById('viewApproval').classList.toggle('hidden', tab !== 'approval');
+      document.getElementById('viewDirectory').classList.toggle('hidden', tab !== 'directory');
+      document.getElementById('viewSources').classList.toggle('hidden', tab !== 'sources');
+
+      document.getElementById('tabApproval').className = `pb-3 border-b-2 flex items-center gap-2 transition ${tab === 'approval' ? 'border-indigo-500 text-indigo-400 font-bold' : 'border-transparent text-slate-400'}`;
+      document.getElementById('tabDirectory').className = `pb-3 border-b-2 flex items-center gap-2 transition ${tab === 'directory' ? 'border-indigo-500 text-indigo-400 font-bold' : 'border-transparent text-slate-400'}`;
+      document.getElementById('tabSources').className = `pb-3 border-b-2 flex items-center gap-2 transition ${tab === 'sources' ? 'border-indigo-500 text-indigo-400 font-bold' : 'border-transparent text-slate-400'}`;
+    }
+
+    function debounceSearch() {
+      clearTimeout(searchTimer);
+      searchTimer = setTimeout(() => {
+        loadOpportunities();
+      }, 300);
+    }
+
+    function filterByCompany(name) {
+      switchTab('directory');
+      document.getElementById('searchInput').value = name;
+      loadOpportunities();
+    }
+
+    function showToast(msg, isError = false) {
+      const toast = document.getElementById('toast');
+      const toastMsg = document.getElementById('toastMsg');
+      toastMsg.innerText = msg;
+      toast.className = `fixed bottom-6 right-6 px-4 py-2.5 rounded-xl shadow-lg border text-xs font-semibold transition transform z-50 flex items-center gap-2 ${
+        isError ? 'bg-rose-600 text-white border-rose-400/40' : 'bg-indigo-600 text-white border-indigo-400/40'
+      }`;
+      toast.classList.remove('translate-y-20', 'opacity-0');
+      setTimeout(() => {
+        toast.classList.add('translate-y-20', 'opacity-0');
+      }, 3500);
+    }
+
+    function loadAllData() {
+      loadStats();
+      loadPendingApprovals();
+      loadOpportunities();
+      loadSources();
+    }
+
+    // Initial Load
+    window.addEventListener('DOMContentLoaded', () => {
+      loadAllData();
+    });
+  </script>
+</body>
+</html>

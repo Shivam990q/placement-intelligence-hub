@@ -1,0 +1,60 @@
+version: '3.8'
+
+services:
+  # 1. PostgreSQL 18 Database
+  postgres:
+    image: postgres:18-alpine
+    container_name: placement_hub_db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-placement_admin}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-placement_secret_2026}
+      POSTGRES_DB: ${POSTGRES_DB:-placement_hub}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U placement_admin -d placement_hub"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # 2. Placement Intelligence API & Dashboard
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: placement_hub_api
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      - DATABASE_URL=postgresql+asyncpg://${POSTGRES_USER:-placement_admin}:${POSTGRES_PASSWORD:-placement_secret_2026}@postgres:5432/${POSTGRES_DB:-placement_hub}
+      - TELEGRAM_BOT_TOKEN=${TELEGRAM_BOT_TOKEN}
+      - TELEGRAM_CHANNEL_ID=${TELEGRAM_CHANNEL_ID}
+      - TELEGRAM_FORUM_GROUP_ID=${TELEGRAM_FORUM_GROUP_ID}
+      - TELEGRAM_ADMIN_IDS=${TELEGRAM_ADMIN_IDS}
+      - WATCHDOG_ENABLED=true
+    ports:
+      - "8000:8000"
+
+  # 3. Dedicated Telegram Watchdog Bot
+  telegram-bot:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: placement_hub_bot
+    restart: unless-stopped
+    depends_on:
+      - api
+    command: python -m apps.telegram_bot.bot
+    environment:
+      - DATABASE_URL=postgresql+asyncpg://${POSTGRES_USER:-placement_admin}:${POSTGRES_PASSWORD:-placement_secret_2026}@postgres:5432/${POSTGRES_DB:-placement_hub}
+      - TELEGRAM_BOT_TOKEN=${TELEGRAM_BOT_TOKEN}
+      - TELEGRAM_CHANNEL_ID=${TELEGRAM_CHANNEL_ID}
+      - TELEGRAM_FORUM_GROUP_ID=${TELEGRAM_FORUM_GROUP_ID}
+
+volumes:
+  postgres_data:
