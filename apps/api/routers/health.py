@@ -63,3 +63,4 @@ async def get_dashboard_stats(db: AsyncSession = Depends(get_db)):
             "status": ethara_opp.status if ethara_opp else "awaiting_opening"
         }
     }
+

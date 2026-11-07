@@ -156,3 +156,4 @@ class TelegramPublisher:
             text=text,
             reply_markup=inline_keyboard
         )
+

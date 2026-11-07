@@ -28,3 +28,4 @@ def test_target_match_sde_intern():
     result = EligibilityAnalyzer.evaluate_target_match(title, desc, ["2027"])
     assert result["match_score"] >= 0.75
     assert result["is_recommended"] is True
+

@@ -141,3 +141,4 @@ async def create_opportunity(data: OpportunityCreate, db: AsyncSession = Depends
     await db.commit()
 
     return opp
+

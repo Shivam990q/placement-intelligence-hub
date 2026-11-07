@@ -60,3 +60,4 @@ class GreenhouseAdapter(BaseSourceAdapter):
             pass
 
         return opportunities
+

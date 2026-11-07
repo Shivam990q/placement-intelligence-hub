@@ -115,3 +115,4 @@ class EtharaCareersAdapter(BaseSourceAdapter):
             opportunities.append(opp)
 
         return opportunities
+

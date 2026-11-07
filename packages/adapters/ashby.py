@@ -59,3 +59,4 @@ class AshbyAdapter(BaseSourceAdapter):
             pass
 
         return opportunities
+

@@ -49,3 +49,4 @@ def test_evaluate_duplicate_candidate_fuzzy_match():
     is_dup, reason, conf = Deduplicator.evaluate_duplicate_candidate(opp_a, opp_b)
     assert is_dup is True
     assert conf >= 0.90
+

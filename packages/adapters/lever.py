@@ -58,3 +58,4 @@ class LeverAdapter(BaseSourceAdapter):
             pass
 
         return opportunities
+

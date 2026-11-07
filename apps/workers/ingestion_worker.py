@@ -247,3 +247,4 @@ class IngestionWorker:
             "duplicates_skipped": total_skipped,
             "details": details
         }
+

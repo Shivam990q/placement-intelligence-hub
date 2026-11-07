@@ -81,3 +81,4 @@ class SourceVerifier:
                 return resp.status_code in (200, 206, 301, 302, 307, 308)
         except Exception:
             return False
+

@@ -54,3 +54,4 @@ async def test_api_health_and_dashboard():
             assert res_action.status_code == 200
             assert res_action.json()["status"] == "success"
             assert res_action.json()["new_status"] in ("approved", "published")
+

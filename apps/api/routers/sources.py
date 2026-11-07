@@ -49,3 +49,4 @@ async def trigger_crawl(source_slug: Optional[str] = None, db: AsyncSession = De
         "timestamp": datetime.utcnow(),
         "summary": results
     }
+

@@ -100,3 +100,4 @@ class EligibilityAnalyzer:
             "is_recommended": score >= 0.65,
             "reasons": reasons
         }
+

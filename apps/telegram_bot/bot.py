@@ -209,3 +209,4 @@ class PlacementTelegramBot:
 if __name__ == "__main__":
     bot = PlacementTelegramBot()
     asyncio.run(bot.start_polling())
+

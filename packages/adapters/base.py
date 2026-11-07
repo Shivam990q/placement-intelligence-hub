@@ -18,3 +18,4 @@ class BaseSourceAdapter(ABC):
 
     def __repr__(self) -> str:
         return f"<SourceAdapter: {self.name} ({self.slug})>"
+

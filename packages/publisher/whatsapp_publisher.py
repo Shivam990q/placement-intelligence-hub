@@ -19,3 +19,4 @@ class WhatsAppPublisher:
             "char_count": len(card_text),
             "instructions": "Click copy and paste into your WhatsApp group ('2027 Batch Placement 1' / 'Group of Placements')."
         }
+

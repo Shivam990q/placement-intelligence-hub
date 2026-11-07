@@ -101,3 +101,4 @@ Run the full automated test suite anytime:
 python -m pytest tests/
 ```
 All unit tests for deduplication, eligibility parsing, format rendering, and end-to-end acquisition cycles are 100% automated and verified.
+

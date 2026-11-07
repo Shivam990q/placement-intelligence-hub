@@ -94,3 +94,4 @@ class AmazonJobsAdapter(BaseSourceAdapter):
         opportunities.append(amazon_ref)
 
         return opportunities
+
