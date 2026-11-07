@@ -610,9 +610,22 @@ class PlacementTelegramBot:
 
         self.running = True
         logger.info("Starting Telegram Bot Poller...")
+        allowed_updates = [
+            "message",
+            "edited_message",
+            "channel_post",
+            "edited_channel_post",
+            "callback_query",
+            "my_chat_member",
+            "chat_member",
+        ]
         while self.running:
             try:
-                updates = await self.api_call("getUpdates", {"offset": self.offset, "timeout": 20})
+                updates = await self.api_call("getUpdates", {
+                    "offset": self.offset,
+                    "timeout": 20,
+                    "allowed_updates": allowed_updates,
+                })
                 if updates.get("ok"):
                     for u in updates.get("result", []):
                         self.offset = u["update_id"] + 1

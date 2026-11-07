@@ -43,3 +43,4 @@ def test_genuine_job_post_not_filtered():
     assert result is not None
     assert result.company == "Hevo Data"
     assert "2026" in result.eligible_batches
+

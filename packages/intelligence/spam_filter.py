@@ -88,3 +88,4 @@ class CommercialSpamFilter:
         is_spam = score >= 0.75 or (score >= 0.45 and not has_job_indicators)
 
         return is_spam, round(score, 2), matches
+
