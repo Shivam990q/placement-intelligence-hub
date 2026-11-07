@@ -26,14 +26,22 @@ class IngestionWorker:
 
     @classmethod
     def get_registered_adapters(cls) -> List[Any]:
-        return [
+        from packages.adapters.ats_directory import GREENHOUSE_BOARDS, LEVER_BOARDS, ASHBY_BOARDS
+        
+        adapters: List[Any] = [
             EtharaCareersAdapter(),
             AmazonJobsAdapter(),
             CommunitySubmissionAdapter(),
-            GreenhouseAdapter(board_token="razorpay", company_name="Razorpay"),
-            LeverAdapter(company_slug="postman", company_name="Postman"),
-            AshbyAdapter(company_slug="retool", company_name="Retool"),
         ]
+        # Register Tier-1 Startups and Tech companies on Greenhouse, Lever, and Ashby
+        for gh in GREENHOUSE_BOARDS:
+            adapters.append(GreenhouseAdapter(board_token=gh, company_name=gh.capitalize()))
+        for lv in LEVER_BOARDS:
+            adapters.append(LeverAdapter(company_slug=lv, company_name=lv.capitalize()))
+        for ash in ASHBY_BOARDS:
+            adapters.append(AshbyAdapter(company_slug=ash, company_name=ash.capitalize()))
+            
+        return adapters
 
     @classmethod
     async def process_single_opportunity(

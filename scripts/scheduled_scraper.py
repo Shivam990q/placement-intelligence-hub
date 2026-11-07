@@ -27,15 +27,8 @@ async def run_standalone_scraper():
     edge_api_url = os.getenv("EDGE_API_URL", "")
     ingest_secret = os.getenv("INGEST_SECRET", "placement_secret_token_2026")
 
-    # 1. Fetch from all adapters
-    adapters = [
-        EtharaCareersAdapter(),
-        AmazonJobsAdapter(),
-        CommunitySubmissionAdapter(),
-        GreenhouseAdapter(board_token="razorpay", company_name="Razorpay"),
-        LeverAdapter(company_slug="postman", company_name="Postman"),
-        AshbyAdapter(company_slug="retool", company_name="Retool"),
-    ]
+    # 1. Fetch from all registered adapters (Ethara, Amazon, ATS directory, Communities)
+    adapters = IngestionWorker.get_registered_adapters()
 
     discovered_items = []
     for adapter in adapters:
