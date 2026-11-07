@@ -9,8 +9,17 @@ from __future__ import annotations
 
 import asyncio
 import logging
+import os
 import re
+import sys
+from pathlib import Path
 from typing import Any, Dict, List, Optional
+
+# Ensure repository root is on sys.path
+REPO_ROOT = str(Path(__file__).resolve().parent.parent.parent)
+if REPO_ROOT not in sys.path:
+    sys.path.insert(0, REPO_ROOT)
+
 import httpx
 from sqlalchemy import desc, select
 
