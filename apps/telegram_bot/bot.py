@@ -90,6 +90,24 @@ class PlacementTelegramBot:
 
     async def handle_update(self, update: Dict[str, Any]) -> None:
         """Routes incoming Telegram updates to appropriate command handlers."""
+        # Handle Channel Posts
+        if "channel_post" in update:
+            chat = update["channel_post"].get("chat", {})
+            chat_id = str(chat.get("id"))
+            chat_title = chat.get("title", "Placements")
+            logger.info(f"Detected channel post in '{chat_title}' (ID: {chat_id})")
+            await self._persist_channel_id(chat_id, chat_title)
+            return
+
+        # Handle Bot Added as Admin to Channel / Chat
+        if "my_chat_member" in update:
+            chat = update["my_chat_member"].get("chat", {})
+            chat_id = str(chat.get("id"))
+            chat_title = chat.get("title", "Placements")
+            logger.info(f"Bot added to channel/chat '{chat_title}' (ID: {chat_id})")
+            await self._persist_channel_id(chat_id, chat_title)
+            return
+
         # Handle Inline Keyboard Callback Queries
         if "callback_query" in update:
             await self._handle_callback_query(update["callback_query"])
@@ -98,6 +116,44 @@ class PlacementTelegramBot:
         # Handle Standard Chat Messages
         if "message" in update:
             await self._handle_message(update["message"])
+
+    async def _persist_channel_id(self, chat_id: str, chat_title: str) -> None:
+        """Updates TELEGRAM_CHANNEL_ID in .env and memory and sends verification post."""
+        if settings.TELEGRAM_CHANNEL_ID != chat_id:
+            settings.TELEGRAM_CHANNEL_ID = chat_id
+            env_file = Path(REPO_ROOT) / ".env"
+            if env_file.exists():
+                lines = env_file.read_text(encoding="utf-8").splitlines()
+                new_lines = []
+                found = False
+                for line in lines:
+                    if line.startswith("TELEGRAM_CHANNEL_ID=") or line.startswith("TELEGRAM_CHANNEL_ID ="):
+                        new_lines.append(f'TELEGRAM_CHANNEL_ID="{chat_id}"')
+                        found = True
+                    else:
+                        new_lines.append(line)
+                if not found:
+                    new_lines.append(f'TELEGRAM_CHANNEL_ID="{chat_id}"')
+                env_file.write_text("\n".join(new_lines) + "\n", encoding="utf-8")
+                logger.info(f"Updated TELEGRAM_CHANNEL_ID to {chat_id} in .env")
+
+            # Send verification post to channel
+            welcome_post = (
+                "🎓 *Placement Intelligence Hub — Radar Connected!*\n"
+                "━━━━━━━━━━━━━━━━━━━━━━━━━━\n"
+                f"📡 Channel *'{chat_title}'* is now active.\n\n"
+                "• *Priority Target:* Ethara.AI LLM GenOPS (₹6 LPA)\n"
+                "• *University Target:* Amazon SDE Intern 2027\n"
+                "• *Scraping Registry:* 25+ Top Tech ATS Portals\n"
+                "• *Anti-Spam Filter:* Active (zero course ads)\n"
+                "━━━━━━━━━━━━━━━━━━━━━━━━━━\n"
+                "Verified opportunities approved by admin will appear here automatically."
+            )
+            await self.api_call("sendMessage", {
+                "chat_id": chat_id,
+                "text": welcome_post,
+                "parse_mode": "Markdown",
+            })
 
     async def _handle_callback_query(self, cb: Dict[str, Any]) -> None:
         """Processes [Approve], [Reject], and [Copy WhatsApp] button clicks."""
