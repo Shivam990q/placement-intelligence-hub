@@ -4,6 +4,7 @@ from packages.adapters.base import BaseSourceAdapter
 from packages.schemas.opportunity import OpportunityCreate
 from packages.intelligence.eligibility import EligibilityAnalyzer
 from packages.intelligence.verifier import SourceVerifier
+from packages.intelligence.spam_filter import CommercialSpamFilter
 
 class CommunitySubmissionAdapter(BaseSourceAdapter):
     """
@@ -21,30 +22,41 @@ class CommunitySubmissionAdapter(BaseSourceAdapter):
     @classmethod
     def parse_raw_text_submission(cls, raw_text: str, submitter: str = "peer") -> Optional[OpportunityCreate]:
         """
-        Parses community message text (like Hevo, TCS NQT, Infosys updates) into structured OpportunityCreate.
+        Parses community message text into structured OpportunityCreate.
+        Automatically filters out commercial course ads, webinars, and coupon promotions.
         """
         if not raw_text or len(raw_text.strip()) < 15:
+            return None
+
+        # Anti-Spam Gate: Drop commercial course promotions & sales clutter
+        is_spam, spam_score, reasons = CommercialSpamFilter.evaluate_text(raw_text)
+        if is_spam:
+            # Drop post if it's purely a course sale or promotional spam
             return None
 
         # Extract URL
         url_match = re.search(r"https?://[^\s<>\"']+", raw_text)
         apply_url = url_match.group(0).rstrip(".,)]") if url_match else ""
 
-        # Extract Company
+        # Extract Company (Prioritize verified entities and explicit headers)
         company = "Community Submission"
-        comp_match = re.search(r"(?:Company|Hiring|drive|at)\s*[:\-]?\s*([A-Za-z0-9\.\s]{2,30}?)(?:\n|\r|\s*[\-–\|]|\s+Freshers|\s+Hiring)", raw_text, re.I)
-        if comp_match:
-            cand = comp_match.group(1).strip()
-            if len(cand) > 1 and cand.lower() not in ["last", "new", "mega", "off", "fresher"]:
-                company = cand
-        elif "hevo" in raw_text.lower():
+        raw_lower = raw_text.lower()
+        if "hevo" in raw_lower:
             company = "Hevo Data"
-        elif "tcs" in raw_text.lower():
+        elif "tcs" in raw_lower:
             company = "TCS"
-        elif "infosys" in raw_text.lower():
+        elif "infosys" in raw_lower:
             company = "Infosys"
-        elif "amazon" in raw_text.lower():
+        elif "amazon" in raw_lower:
             company = "Amazon"
+        elif "ethara" in raw_lower:
+            company = "Ethara.AI"
+        else:
+            comp_match = re.search(r"(?:Company|Organization)\s*[:\-]?\s*([A-Za-z0-9\.\s]{2,30}?)(?:\n|\r|\s*[\-–\|])", raw_text, re.I)
+            if comp_match:
+                cand = comp_match.group(1).strip()
+                if len(cand) > 1 and cand.lower() not in ["last", "new", "mega", "off", "fresher"] and "role" not in cand.lower():
+                    company = cand
 
         # Extract Role
         role = "Software Engineer / Graduate Trainee"
